@@ -27,17 +27,20 @@ class ClothingSementationDataset(Dataset):
         mask_path = f'data/png_masks/MASKS/seg_{idx+1:04d}.png'
         image = cv.imread(image_path, cv.IMREAD_COLOR)
         image = cv.resize(image, (config.model_image_width, config.model_image_height))
-        image = torch.from_numpy(image)
+        image = torch.from_numpy(image).to(torch.float)
         image = image.permute(2, 0, 1)
 
         mask = cv.cvtColor(cv.imread(mask_path, cv.IMREAD_COLOR), cv.COLOR_BGR2GRAY)
         mask = cv.resize(mask, (config.model_image_width, config.model_image_height))
-        mask = torch.from_numpy(mask)
-        mask = mask.unsqueeze(0)
+        mask = torch.from_numpy(mask).to(torch.long)
 
         # Remove skin and hair labels
         mask = torch.where(mask == 19, 0, mask)
         mask = torch.where(mask == 41, 0, mask)
+        # extended_mask = torch.zeros((59,mask.shape[0],mask.shape[1]))
+        # for i in range(59):
+        #     extended_mask[i, :, :][mask == i] = 1
+
         return image, mask
 
 if __name__ == "__main__":

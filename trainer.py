@@ -1,9 +1,10 @@
 import config
 import training_utils
 from clothing_segmentation_dataset import ClothingSementationDataset
-from loss import FocalLoss
 from unet import UNet
 import torch
+# from torchvision.ops.focal_loss import sigmoid_focal_loss
+from loss import FocalLoss
 
 device = "cuda" if torch.cuda.is_available() else "mps"
 if __name__ == "__main__":
@@ -31,21 +32,21 @@ if __name__ == "__main__":
         total_training_iou_counted_by_class = torch.tensor([0] * config.number_of_classifications)
 
         for i, (images, maskImages) in enumerate(train_loader):
-            print(i)
-            images = images.to(device).to(torch.float)
-            maskImages = maskImages.to(device).to(torch.long)
+            # print(i)
+            images = images.to(device).to(torch.float32)
+            maskImages = maskImages.to(device).to(torch.float32)
             outputs = model(images)
-            loss = loss_function(outputs, maskImages)
+            loss = loss_function(outputs.to(torch.float), maskImages.to(torch.long))
             totalLoss += loss
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             total_training_ious_counted += 1
-            total_training_iou += training_utils.average_class_iou(outputs, maskImages)
+            # total_training_iou += training_utils.average_class_iou(outputs, maskImages)
 
-            ious, counts = training_utils.class_ious(outputs, maskImages)
-            total_training_iou_by_class = total_training_iou_by_class + ious
-            total_training_iou_counted_by_class = total_training_iou_counted_by_class + counts
+            # ious, counts = training_utils.class_ious(outputs, maskImages)
+            # total_training_iou_by_class = total_training_iou_by_class + ious
+            # total_training_iou_counted_by_class = total_training_iou_counted_by_class + counts
 
         totalLoss /= num_total_steps
         average_training_iou = total_training_iou / total_training_ious_counted
