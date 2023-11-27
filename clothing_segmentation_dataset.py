@@ -29,7 +29,8 @@ class ClothingSementationDataset(Dataset):
         image = cv.resize(image, (config.model_image_width, config.model_image_height))
         image = torch.from_numpy(image).to(torch.float)
         image = image.permute(2, 0, 1)
-
+        image = image / 256
+        
         mask = cv.cvtColor(cv.imread(mask_path, cv.IMREAD_COLOR), cv.COLOR_BGR2GRAY)
         mask = cv.resize(mask, (config.model_image_width, config.model_image_height))
         mask = torch.from_numpy(mask).to(torch.long)
@@ -37,9 +38,6 @@ class ClothingSementationDataset(Dataset):
         # Remove skin and hair labels
         mask = torch.where(mask == 19, 0, mask)
         mask = torch.where(mask == 41, 0, mask)
-        # extended_mask = torch.zeros((59,mask.shape[0],mask.shape[1]))
-        # for i in range(59):
-        #     extended_mask[i, :, :][mask == i] = 1
 
         return image, mask
 

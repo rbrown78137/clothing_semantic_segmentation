@@ -4,5 +4,5 @@ model_image_height = 256
 distribution_forward_passes = 20
 
 batch_size = 32
-num_epochs = 100
-learning_rate = 0.001
+num_epochs = 10000
+learning_rate = 0.0001

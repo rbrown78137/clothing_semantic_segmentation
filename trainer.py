@@ -3,10 +3,10 @@ import training_utils
 from clothing_segmentation_dataset import ClothingSementationDataset
 from unet import UNet
 import torch
-# from torchvision.ops.focal_loss import sigmoid_focal_loss
 from loss import FocalLoss
 
 device = "cuda" if torch.cuda.is_available() else "mps"
+
 if __name__ == "__main__":
     dataset = ClothingSementationDataset()
     train_size = int(0.8 * len(dataset))
@@ -16,15 +16,16 @@ if __name__ == "__main__":
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
 
     model = UNet().to(device)
+    model.load_state_dict(torch.load("saved_models/train_network_test.pth"))
+
     loss_function = FocalLoss()
-    optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate,weight_decay=0)
     num_total_steps = len(train_loader)
     num_total_steps_in_test = len(test_loader)
 
     highest_iou_accuracy = 0.0
 
     for epoch in range(config.num_epochs):
-        print(epoch)
         totalLoss = 0
         total_training_ious_counted = 0
         total_training_iou = 0
@@ -32,7 +33,6 @@ if __name__ == "__main__":
         total_training_iou_counted_by_class = torch.tensor([0] * config.number_of_classifications)
 
         for i, (images, maskImages) in enumerate(train_loader):
-            # print(i)
             images = images.to(device).to(torch.float32)
             maskImages = maskImages.to(device).to(torch.float32)
             outputs = model(images)
@@ -42,17 +42,10 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
             total_training_ious_counted += 1
-            # total_training_iou += training_utils.average_class_iou(outputs, maskImages)
-
-            # ious, counts = training_utils.class_ious(outputs, maskImages)
-            # total_training_iou_by_class = total_training_iou_by_class + ious
-            # total_training_iou_counted_by_class = total_training_iou_counted_by_class + counts
 
         totalLoss /= num_total_steps
         average_training_iou = total_training_iou / total_training_ious_counted
         print(f"Epoch: {epoch} Loss: {totalLoss} ")
-        print(f"Training IOU: {average_training_iou}")
-        print(f"Training IOU By CLASS: {total_training_iou_by_class / total_training_iou_counted_by_class}")
         if epoch % 10 == 0:
             shouldRecord = False
 
@@ -85,7 +78,7 @@ if __name__ == "__main__":
                     highest_iou_accuracy = average_training_iou
                     shouldRecord = True
                 if shouldRecord:
-                    PATH = './saved_models/train_network' + str(epoch) + '.pth'
+                    PATH = './saved_models/train_network.pth'
                     torch.save(model.state_dict(), PATH)
                     print("Saved Model")
 
