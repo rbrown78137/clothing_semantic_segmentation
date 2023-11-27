@@ -55,6 +55,7 @@ if __name__ == "__main__":
                 total_iou = 0
                 total_iou_by_class= torch.tensor([0]*config.number_of_classifications)
                 total_iou_counted_by_class = torch.tensor([0]*config.number_of_classifications)
+                
                 for j, (test_images, test_masks) in enumerate(test_loader):
                     test_images = test_images.to(device)
                     test_masks = test_masks.to(device)
@@ -69,14 +70,16 @@ if __name__ == "__main__":
                     ious, counts = training_utils.class_ious(test_output_prob,test_masks)
                     total_iou_by_class = total_iou_by_class + ious
                     total_iou_counted_by_class = total_iou_counted_by_class + counts
+                
                 accuracy = totalCorrect/(config.model_image_width * config.model_image_height * numCounted)
                 iou_accuracy = total_iou / numCounted
                 print(f"IOU Accuracy: {iou_accuracy}")
                 print(f"IOU By CLASS: {total_iou_by_class/total_iou_counted_by_class}")
-                average_training_iou
+                
                 if (average_training_iou >= highest_iou_accuracy or average_training_iou >= .95) and epoch > 0:
                     highest_iou_accuracy = average_training_iou
                     shouldRecord = True
+                
                 if shouldRecord:
                     PATH = './saved_models/train_network.pth'
                     torch.save(model.state_dict(), PATH)

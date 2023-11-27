@@ -2,7 +2,6 @@ import torch
 import matplotlib.pyplot as plt
 import time
 import pylab
-
 import config
 
 
@@ -50,6 +49,7 @@ def average_class_iou(prediction_prob, ground_truth):
     prediction = prediction_prob.argmax(1)
     total_iou = 0
     counted_classes = 0
+
     for x in range(config.number_of_classifications):
         intersection = torch.where(torch.bitwise_and(prediction == x, ground_truth == x), 1, 0)
         union = torch.where(torch.bitwise_or(prediction == x, ground_truth == x), 1, 0)
@@ -74,4 +74,5 @@ def class_ious(prediction_prob, ground_truth):
             iou = iou.item()
             total_iou[x] = total_iou[x] + iou
             counted_classes[x] = counted_classes[x] + 1
+            
     return total_iou,counted_classes

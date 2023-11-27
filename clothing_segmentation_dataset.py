@@ -4,7 +4,6 @@ import cv2 as cv
 import os
 import matplotlib.pyplot as plt
 import config
-import augmentations
 
 class ClothingSementationDataset(Dataset):
     def __init__(self, transform=None, target_transform=None):
@@ -30,7 +29,7 @@ class ClothingSementationDataset(Dataset):
         image = torch.from_numpy(image).to(torch.float)
         image = image.permute(2, 0, 1)
         image = image / 256
-        
+
         mask = cv.cvtColor(cv.imread(mask_path, cv.IMREAD_COLOR), cv.COLOR_BGR2GRAY)
         mask = cv.resize(mask, (config.model_image_width, config.model_image_height))
         mask = torch.from_numpy(mask).to(torch.long)
@@ -48,4 +47,4 @@ if __name__ == "__main__":
     train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True)
     for i, (images, labels) in enumerate(train_loader):
-        test = 1
+        pass
