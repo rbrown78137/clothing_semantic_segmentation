@@ -48,7 +48,7 @@ if __name__ == "__main__":
         print(f"Epoch: {epoch} Loss: {totalLoss} ")
         if epoch % 10 == 0:
             shouldRecord = False
-
+            test_loss = 0
             with torch.no_grad():
                 totalCorrect = 0
                 numCounted = 0
@@ -60,6 +60,9 @@ if __name__ == "__main__":
                     test_images = test_images.to(device)
                     test_masks = test_masks.to(device)
                     test_output_prob = model(test_images)
+
+                    test_loss = loss_function(test_output_prob.to(torch.float), test_masks.to(torch.long))
+                    test_loss += test_loss
                     test_output = test_output_prob.argmax(1)
 
                     numCorrect = 0
@@ -73,6 +76,7 @@ if __name__ == "__main__":
                 
                 accuracy = totalCorrect/(config.model_image_width * config.model_image_height * numCounted)
                 iou_accuracy = total_iou / numCounted
+                print(f"Test Loss:{test_loss / num_total_steps_in_test}")
                 print(f"IOU Accuracy: {iou_accuracy}")
                 print(f"IOU By CLASS: {total_iou_by_class/total_iou_counted_by_class}")
                 

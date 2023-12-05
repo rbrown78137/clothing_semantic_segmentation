@@ -38,6 +38,10 @@ class ClothingSementationDataset(Dataset):
         mask = torch.where(mask == 19, 0, mask)
         mask = torch.where(mask == 41, 0, mask)
 
+        # Remove Unneccesary attributes
+        
+        # Combine Attributes
+
         return image, mask
 
 if __name__ == "__main__":

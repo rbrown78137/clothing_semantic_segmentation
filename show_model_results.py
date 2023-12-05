@@ -14,9 +14,9 @@ if __name__ == "__main__":
         image_path = f'data/png_images/IMAGES/img_{idx+1:04d}.png'
         mask_path = f'data/png_masks/MASKS/seg_{idx+1:04d}.png'
 
-        image = cv.imread(image_path, cv.IMREAD_COLOR)
-        image = cv.resize(image, (config.model_image_width, config.model_image_height))
-        image = torch.from_numpy(image).to(torch.float)
+        og_image = cv.imread(image_path, cv.IMREAD_COLOR)
+        og_image = cv.resize(og_image, (config.model_image_width, config.model_image_height))
+        image = torch.from_numpy(og_image).to(torch.float)
         image = image.permute(2, 0, 1)
         image = image / 256
 
@@ -32,10 +32,15 @@ if __name__ == "__main__":
         model_prediction = model(image)
         outputs = model(image).squeeze(0)
         outputs = outputs.argmax(0)
-		
-        image_tensor = image[0].detach()
+
+        display_image = cv.cvtColor(og_image, cv.COLOR_BGR2RGB)
+        display_image = torch.from_numpy(display_image).to(torch.float)
+        display_image = display_image.permute(2, 0, 1)
+        display_image = display_image / 256
+        
+        breakpoint()
         plt.subplot(1, 2, 1)
-        plt.imshow(image_tensor.to("cpu").permute(1, 2, 0))
+        plt.imshow(display_image.to("cpu").permute(1, 2, 0))
         plt.subplot(1, 2, 2)
         plt.imshow(outputs.to("cpu")/256)
         breakpoint()
